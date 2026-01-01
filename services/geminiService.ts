@@ -1,7 +1,7 @@
 
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
-const SYSTEM_INSTRUCTION = `You are an AI documentation assistant integrated into Lumina MD, a professional markdown editor for iPad.
+const SYSTEM_INSTRUCTION = `You are an AI documentation assistant integrated into Mark, a professional markdown editor for iPad.
 
 Your capabilities:
 1. Analyze markdown documents for clarity, consistency, and completeness.
@@ -23,15 +23,15 @@ Output Format:
 - For analysis: Structured findings with severity (INFO/WARNING/CRITICAL).`;
 
 export const geminiService = {
-  async chat(prompt: string, context: string, history: {role: 'user' | 'model', text: string}[]) {
+  async chat(prompt: string, context: string, history: { role: 'user' | 'model', text: string }[]) {
     // Correctly initialize GoogleGenAI with process.env.API_KEY as a named parameter.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    
+
     const contents = [
       ...history.map(h => ({ role: h.role, parts: [{ text: h.text }] })),
-      { 
-        role: 'user', 
-        parts: [{ text: `CONTEXT (Current Document Content):\n\`\`\`markdown\n${context}\n\`\`\`\n\nUSER REQUEST: ${prompt}` }] 
+      {
+        role: 'user',
+        parts: [{ text: `CONTEXT (Current Document Content):\n\`\`\`markdown\n${context}\n\`\`\`\n\nUSER REQUEST: ${prompt}` }]
       }
     ];
 

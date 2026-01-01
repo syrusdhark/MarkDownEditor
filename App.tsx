@@ -54,6 +54,7 @@ import { AIChatMessage, WorkspaceFile } from './types';
 import { geminiService } from './services/geminiService';
 import { GitHubImportModal } from './components/GitHubImportModal';
 import { FileSidebar } from './components/FileSidebar';
+import { AuthScreen } from './components/AuthScreen';
 
 // Initialize Mermaid
 mermaid.initialize({
@@ -166,9 +167,11 @@ const FONT_SIZES = [
   { name: 'Extra Large', value: '32px' },
 ];
 
-const DEFAULT_CONTENT = '# Welcome to Lumina\n\nLumina is your distraction-free AI markdown workspace.\n\n## Features\n- **Visual Editing**: Edit directly on the preview surface.\n- **Multi-file Workspace**: Work on multiple documents at once.\n- **AI Intelligence**: Summarize, rewrite, and analyze with Gemini 3 Pro.\n- **GitHub Import**: Easily pull content from repositories.\n\n*Start editing this text visually or ask the AI for help!*';
+const DEFAULT_CONTENT = '# Welcome to Mark\n\nMark is your distraction-free AI markdown workspace.\n\n## Features\n- **Visual Editing**: Edit directly on the preview surface.\n- **Multi-file Workspace**: Work on multiple documents at once.\n- **AI Intelligence**: Summarize, rewrite, and analyze with Gemini 3 Pro.\n- **GitHub Import**: Easily pull content from repositories.\n\n*Start editing this text visually or ask the AI for help!*';
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   // Multi-file state
   const [files, setFiles] = useState<WorkspaceFile[]>([
     { id: '1', name: 'Welcome.md', content: DEFAULT_CONTENT, lastModified: Date.now() }
@@ -431,6 +434,16 @@ graph TD;
     handleChat(undefined, prompt);
   };
 
+  const handleLogin = (provider: string) => {
+    // In a real app, this would handle the OAuth flow
+    console.log(`Logging in with ${provider}`);
+    setIsAuthenticated(true);
+  };
+
+  if (!isAuthenticated) {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
+
   return (
     <div className="flex h-screen bg-slate-50 font-sans overflow-hidden relative">
 
@@ -473,7 +486,7 @@ graph TD;
             >
               <SidebarIcon size={20} />
             </button>
-            <div className="w-8 h-8 md:w-9 md:h-9 bg-blue-600 rounded-lg md:rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-900/10 shrink-0">L</div>
+            <div className="w-8 h-8 md:w-9 md:h-9 bg-blue-600 rounded-lg md:rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-900/10 shrink-0">M</div>
             <div className="flex flex-col min-w-0">
               <input
                 type="text"
@@ -751,7 +764,7 @@ graph TD;
           <div className="flex items-center gap-3 md:gap-4">
             <div className="w-9 h-9 md:w-11 md:h-11 bg-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-xl shadow-purple-200"><Sparkles size={20} /></div>
             <div>
-              <h3 className="font-black text-slate-800 tracking-tight leading-none mb-1 text-xs md:text-base">Lumina AI</h3>
+              <h3 className="font-black text-slate-800 tracking-tight leading-none mb-1 text-xs md:text-base">Mark AI</h3>
               <p className="text-[8px] md:text-[10px] text-slate-400 uppercase tracking-widest font-black">Gemini 3 Pro</p>
             </div>
           </div>
@@ -799,7 +812,7 @@ graph TD;
 
         <div className="p-4 md:p-8 border-t border-slate-100 bg-white shrink-0">
           <form onSubmit={handleChat} className="relative group">
-            <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask Lumina anything..." className="w-full pl-4 md:pl-6 pr-12 md:pr-16 py-4 md:py-5 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-[11px] md:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:bg-white transition-all font-medium" />
+            <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask Mark anything..." className="w-full pl-4 md:pl-6 pr-12 md:pr-16 py-4 md:py-5 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl text-[11px] md:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:bg-white transition-all font-medium" />
             <button type="submit" disabled={!chatInput.trim() || isAiLoading} className="absolute right-2 md:right-3 top-2 md:top-3 p-2 md:p-2.5 bg-purple-600 text-white rounded-lg md:rounded-xl hover:bg-purple-700 disabled:opacity-20 transition-all shadow-lg shadow-purple-200 active:scale-95"><Send size={18} /></button>
           </form>
         </div>
