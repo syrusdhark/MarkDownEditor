@@ -1,0 +1,5 @@
+{
+  "name": "Lumina MD - AI iPad Markdown Editor",
+  "description": "A professional-grade, iPad-optimized Markdown editor that integrates with GitHub and leverages Gemini 3 AI for document analysis, summarization, and intelligent editing.",
+  "requestFramePermissions": []
+}
