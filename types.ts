@@ -47,3 +47,10 @@ export interface AIChatMessage {
   timestamp: number;
   isSuggestion?: boolean;
 }
+
+export interface WorkspaceFile {
+  id: string;
+  name: string;
+  content: string;
+  lastModified: number;
+}

@@ -1,90 +1,56 @@
-
-import { GitHubFile, GitHubRepo, RepoConfig } from '../types';
+export interface GitHubFile {
+  name: string;
+  path: string;
+  sha: string;
+  size: number;
+  url: string;
+  html_url: string;
+  git_url: string;
+  download_url: string;
+  type: 'file' | 'dir';
+  _links: {
+    self: string;
+    git: string;
+    html: string;
+  };
+}
 
 export const githubService = {
-  async fetchUserRepos(token: string): Promise<GitHubRepo[]> {
-    const response = await fetch(
-      `https://api.github.com/user/repos?sort=updated&per_page=100`,
-      {
-        headers: {
-          Authorization: `token ${token}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
-      }
-    );
-    if (!response.ok) throw new Error('Failed to fetch repositories. Check your token permissions.');
-    return response.json();
-  },
+  /**
+   * Fetches the contents of a repository path.
+   */
+  async getRepoContents(owner: string, repo: string, path: string = '', token?: string): Promise<GitHubFile[]> {
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const headers: HeadersInit = {
+      'Accept': 'application/vnd.github.v3+json',
+    };
 
-  async fetchFiles(config: RepoConfig, path: string = ''): Promise<GitHubFile[]> {
-    const response = await fetch(
-      `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${path}?ref=${config.branch}`,
-      {
-        headers: {
-          Authorization: `token ${config.token}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
-      }
-    );
-    if (!response.ok) throw new Error('Failed to fetch files from GitHub');
-    return response.json();
-  },
-
-  async fetchFileContent(config: RepoConfig, path: string): Promise<string> {
-    const response = await fetch(
-      `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${path}?ref=${config.branch}`,
-      {
-        headers: {
-          Authorization: `token ${config.token}`,
-          Accept: 'application/vnd.github.v3.raw',
-        },
-      }
-    );
-    if (!response.ok) throw new Error('Failed to fetch file content');
-    return response.text();
-  },
-
-  async commitChanges(
-    config: RepoConfig,
-    path: string,
-    content: string,
-    sha: string,
-    message: string
-  ): Promise<void> {
-    const response = await fetch(
-      `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${path}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `token ${config.token}`,
-          Accept: 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message,
-          content: btoa(unescape(encodeURIComponent(content))),
-          sha,
-          branch: config.branch,
-        }),
-      }
-    );
-    if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || 'Failed to commit changes');
+    if (token) {
+      headers['Authorization'] = `token ${token}`;
     }
+
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `GitHub API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : [data];
   },
 
-  async fetchCommits(config: RepoConfig, path: string) {
-    const response = await fetch(
-      `https://api.github.com/repos/${config.owner}/${config.repo}/commits?path=${path}&sha=${config.branch}`,
-      {
-        headers: {
-          Authorization: `token ${config.token}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
-      }
-    );
-    if (!response.ok) throw new Error('Failed to fetch commits');
-    return response.json();
+  /**
+   * Fetches the raw content of a file.
+   * Leverages the download_url or custom logic if needed.
+   */
+  async getFileContent(downloadUrl: string): Promise<string> {
+    const response = await fetch(downloadUrl);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file content: ${response.status}`);
+    }
+
+    return await response.text();
   }
 };
